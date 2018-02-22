@@ -1,0 +1,28 @@
+{
+  "name": "character-trainer",
+  "version": "0.0.1",
+  "description": "Compares user drawn imput against a rendered character",
+  "main": "start.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hmillerbakewell/character-trainer.git"
+  },
+  "keywords": [
+    "character",
+    "learn",
+    "draw"
+  ],
+  "author": "hmillerbakewell",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hmillerbakewell/character-trainer/issues"
+  },
+  "homepage": "https://github.com/hmillerbakewell/character-trainer#readme",
+  "dependencies": {
+    "browserify": "^16.1.0",
+    "jquery": "^3.3.1"
+  }
+}
