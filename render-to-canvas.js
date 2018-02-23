@@ -29,6 +29,13 @@ function textToContext (character, context) {
   context.fillText(character, 0, (context.canvas.height / 2), context.canvas.width)
 }
 
+function circle (x, y, radius, context) {
+  context.beginPath()
+  context.arc(x, y, radius, 0, Math.PI * 2)
+  context.stroke()
+}
+
 module.exports.exampleKanji = exampleKanji
 module.exports.textToContext = textToContext
 module.exports.imageToContext = imageToContext
+module.exports.circle = circle

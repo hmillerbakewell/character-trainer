@@ -1,4 +1,72 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var d2 = function (a, b) {
+  return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2)
+}
+
+var imageMean = function (canvas) {
+  var imageData = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height)
+  var totalWidth = 0
+  var totalHeight = 0
+  var numPixels = 0
+  var addToMean = function (i) {
+    var width = i % canvas.width
+    var height = Math.floor(i / canvas.width)
+    totalWidth += width
+    totalHeight += height
+    numPixels += 1
+  }
+  var max = 0
+  for (var i = 0; i < imageData.data.length; i += 4) {
+    // Just pull the alpha layer?
+    var alpha = imageData.data[i + 3]
+    if (alpha > 128) {
+      var point = Math.floor(i / 4)
+      addToMean(point)
+      max = Math.max(max, alpha)
+    }
+  }
+  console.log(max)
+  return {
+    averageX: totalWidth / numPixels,
+    averageY: totalHeight / numPixels
+  }
+}
+
+var imageAbsoluteDeviation = function (canvas, meanData) {
+  var meanPoint = {
+    x: meanData.averageX,
+    y: meanData.averageY
+  }
+  var imageData = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height)
+  var totalDifference = 0
+  var numPixels = 0
+  var addToDifference = function (i) {
+    var width = i % canvas.width
+    var height = Math.floor(i / canvas.width)
+    var difference = Math.sqrt(d2({
+      x: width,
+      y: height
+    }, meanPoint))
+    numPixels += 1
+    totalDifference += difference
+  }
+  for (var i = 0; i < imageData.data.length; i += 4) {
+    // Just pull the alpha layer?
+    var alpha = imageData.data[i + 3]
+    if (alpha > 128) {
+      var point = Math.floor(i / 4)
+      addToDifference(point)
+    }
+  }
+  return {
+    meanAbsoluteDeviation: totalDifference / numPixels
+  }
+}
+
+module.exports.mean = imageMean
+module.exports.deviation = imageAbsoluteDeviation
+
+},{}],2:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v3.3.1
  * https://jquery.com/
@@ -10364,7 +10432,7 @@ if ( !noGlobal ) {
 return jQuery;
 } );
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 // Given any form of input we want to render it, as large as possible, to a canvas element
 
 var exampleKanji = 'た'
@@ -10396,16 +10464,26 @@ function textToContext (character, context) {
   context.fillText(character, 0, (context.canvas.height / 2), context.canvas.width)
 }
 
+function circle (x, y, radius, context) {
+  context.beginPath()
+  context.arc(x, y, radius, 0, Math.PI * 2)
+  context.stroke()
+}
+
 module.exports.exampleKanji = exampleKanji
 module.exports.textToContext = textToContext
 module.exports.imageToContext = imageToContext
+module.exports.circle = circle
 
-},{}],3:[function(require,module,exports){
-var render = require('./render-to-canvas.js')
+},{}],4:[function(require,module,exports){
+window.render = require('./render-to-canvas.js')
+window.analysis = require('./analyse.js')
 var $ = require('jquery')
 
 window.onload = function () {
   var canvas = document.createElement('canvas')
+  var render = window.render
+  var analysis = window.analysis
   window.canvas = canvas
   canvas.width = 300
   canvas.height = 300
@@ -10415,4 +10493,20 @@ window.onload = function () {
   render.textToContext(render.exampleKanji, canvas.getContext('2d'))
 }
 
-},{"./render-to-canvas.js":2,"jquery":1}]},{},[3]);
+window.assess = function () {
+  var render = window.render
+  var analysis = window.analysis
+  var canvas = window.canvas
+  var mean = analysis.mean(canvas)
+  console.log('The image mean is: ')
+  console.log(mean)
+
+  var deviation = analysis.deviation(canvas, mean)
+  console.log('The image deviation is: ')
+  console.log(deviation)
+
+  //render.circle(mean.averageX, mean.averageY, 5, canvas.getContext('2d'))
+  render.circle(mean.averageX, mean.averageY, deviation.meanAbsoluteDeviation, canvas.getContext('2d'))
+}
+
+},{"./analyse.js":1,"./render-to-canvas.js":3,"jquery":2}]},{},[4]);
